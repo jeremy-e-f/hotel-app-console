@@ -1,18 +1,23 @@
 
 // récupération du module `readline`
-var readline = require('readline');
+const readline = require('readline');
 // création d'un objet `rl` permettant de récupérer la saisie utilisateur
-var rl = readline.createInterface({
+const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-function start(){
-    startMenu();
-}
+const {Service} = require('./service.js');
+const service= new Service();
 
-function startMenu(){
-    var chaineMenu= `
+class Presentation{
+
+    start(){
+        this.startMenu();
+    }
+
+    startMenu(){
+        const chaineMenu= `
         Menu
 ~.~.~.~.~.~.~.~.~.~.~
 1. Lister les clients
@@ -23,67 +28,74 @@ function startMenu(){
 
 Veuillez saisir votre choix:
         `;
-    var moduleService= require("./service.js");
 
-    // récupération de la saisie utilisateur
-    rl.question(chaineMenu, function(saisie) {
-        // la variable `saisie` contient la saisie effectuée
-        console.log(`Votre choix : ${saisie}`);
-        switch(saisie){
-            case "1":
-                moduleService.listerClients(function(data){
-                    console.log("Clients trouvés: ");
-                    afficherListeClients(data);
-                    startMenu();
-                });
-                break;
-
-            case "2":
-                rl.question("Veuillez saisir le nom du nouveau client: ", function(nom) {
-                    console.log(nom); 
-                    rl.question("Veuillez saisir le (les) prénom(s) du nouveau client: ", function(prenoms) {
-                        console.log(prenoms);
-
-                        moduleService.creerClient(nom, prenoms, function(data){
-                            console.log("Enregistrement du client...");
-                            console.log(data);
-                            startMenu();
-                        });
-
-                    });
-                });                
-                break;
-
-            case "3":
-                rl.question("Veuillez saisir le nom du client: ", function(nom) {
-                    moduleService.rechercherClientParNom(nom, function(data){
-                        console.log("Clients trouvés: ");
+        // récupération de la saisie utilisateur
+        rl.question(chaineMenu, saisie => {
+            // la variable `saisie` contient la saisie effectuée
+            console.log(`Votre choix : ${saisie}`);
+            switch(saisie){
+                case '1':
+                    service.listerClients()
+                    .then(data => {
+                        console.log('Clients trouvés: ');
                         afficherListeClients(data);
-                        startMenu();
-                    });
-                });
-                break;
+                        this.startMenu();
+                    })
+                    .catch(err => console.log(`Une erreur s'est produite: ${err}`));
+                    break;
 
-            case "4": /* A terminer */
-                rl.question("Veuillez saisir la période pour laquelle vous voulez vérifier la disponibilité des chambres.\nDate de début: ", function(dateDebut) {
-                    rl.question("Date de fin: ", function(dateFin) {
-                        console.log(` Du ${dateDebut} au ${dateFin} :`);
+                case '2':
+                    rl.question('Veuillez saisir le nom du nouveau client: ', nom => {
+                        console.log(nom); 
+                        rl.question('Veuillez saisir le (les) prénom(s) du nouveau client: ', prenoms => {
+                            console.log(prenoms);
 
-                        moduleService.verifierDisponibilite(dateDebut, dateFin, function(data){
-                            console.log(data);
-                            startMenu();
+                            service.creerClient(nom, prenoms)
+                            .then(data => {
+                                console.log('Enregistrement du client...');
+                                console.log(data);
+                                this.startMenu();
+                            })
+                            .catch(err => console.log(`Une erreur s'est produite: ${err}`));
                         });
+                    });                
+                    break;
 
+                case '3':
+                    rl.question('Veuillez saisir le nom du client: ', nom => {
+                        service.rechercherClientParNom(nom)
+                        .then(data => {
+                            console.log('Clients trouvés: ');
+                            afficherListeClients(data);
+                            this.startMenu();
+                        })
+                        .catch(err => console.log(`Une erreur s'est produite: ${err}`));
                     });
-                });                
-                break;
+                    break;
 
-            case "99":
-                rl.close(); // attention, une fois l'interface fermée, la saisie n'est plus possible
-                console.log("Fini");
-                break;
-        }
-    });
+                case '4': /* A terminer */
+                    rl.question('Veuillez saisir la période pour laquelle vous voulez vérifier la disponibilité des chambres.\nDate de début: ', dateDebut => {
+                        rl.question('Date de fin: ', dateFin => {
+                            console.log(` Du ${dateDebut} au ${dateFin} :`);
+
+                            service.verifierDisponibilite(dateDebut, dateFin)
+                            .then(data => {
+                                console.log(data);
+                                this.startMenu();
+                            })
+                            .catch(err => console.log(`Une erreur s'est produite: ${err}`));
+                        });
+                    });                
+                    break;
+
+                case '99':
+                    rl.close(); // Attention, une fois l'interface fermée, la saisie n'est plus possible
+                    console.log('Aurevoir');
+                    break;
+            }
+        });
+
+    }
 
 }
 
@@ -93,5 +105,4 @@ function afficherListeClients(listeClients){
     });
 }
 
-exports.start= start;
-
+exports.Presentation= Presentation;

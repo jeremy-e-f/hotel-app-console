@@ -1,3 +1,4 @@
 console.log('** Administration Hotel **');
-var moduleMenu = require("./presentation.js");
-moduleMenu.start();
+const {Presentation} = require('./presentation.js');
+presentation= new Presentation();
+presentation.start();
