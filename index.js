@@ -1,4 +1,5 @@
+"use strict";
 console.log('** Administration Hotel **');
-const {Presentation} = require('./presentation.js');
-presentation= new Presentation();
+var Presentation = require('./presentation.js').Presentation;
+var presentation = new Presentation();
 presentation.start();
